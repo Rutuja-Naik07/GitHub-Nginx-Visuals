@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nginx Server Visual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <h1>Nginx Server <span>visual</span></h1>
+    <p class="lead">A visitor opens a Streamflix page. Follow the request.</p>
+    <ol id="steps" class="steps"></ol>
+  </aside>
+
+  <main class="main">
+    <section class="stage">
+      <svg id="diagram" viewBox="0 0 900 360" role="img" aria-label="Diagram of a request travelling from a browser to NGINX on AWS EC2">
+        <!-- AWS layers -->
+        <rect class="cloud" x="285" y="8" width="605" height="344" rx="10"/>
+        <text class="lbl" x="300" y="26">AWS Cloud · Region</text>
+        <rect class="vpc" x="300" y="36" width="578" height="304" rx="10"/>
+        <text class="lbl" x="316" y="56">VPC · 10.0.0.0/16</text>
+        <rect class="subnet" x="316" y="64" width="546" height="266" rx="10"/>
+        <text class="lbl" x="332" y="84">Public subnet</text>
+
+        <!-- Security group -->
+        <g data-from="2" data-focus="2,7">
+          <rect class="sg" x="336" y="92" width="512" height="226" rx="10"/>
+          <text class="sgt" x="350" y="110">Security Group (door guard)</text>
+          <rect class="tag" x="560" y="98" width="140" height="18" rx="9"/>
+          <text class="tagt" x="630" y="110" text-anchor="middle">Allow 80 · HTTP · anywhere</text>
+          <rect class="tag" x="708" y="98" width="130" height="18" rx="9"/>
+          <text class="tagt" x="773" y="110" text-anchor="middle">Allow 22 · SSH · my IP</text>
+          <path class="blocked" d="M300 230 H350"/>
+          <text class="small" x="345" y="248" text-anchor="end">other ports: blocked</text>
+          <text x="352" y="234" class="no">⛔</text>
+        </g>
+
+        <!-- EC2 -->
+        <g data-from="1" data-focus="1">
+          <rect class="ec2" x="350" y="122" width="486" height="184" rx="10"/>
+          <text class="lbl" x="364" y="142">EC2 instance · Amazon Linux 2023</text>
+          <text class="small" x="364" y="157">Public IPv4: 54.210.x.x</text>
+          <text class="small" x="800" y="142" text-anchor="end">t3.micro</text>
+          <circle class="dot" cx="820" cy="140" r="6"/>
+        </g>
+
+        <!-- Terminal -->
+        <g data-from="3" data-focus="3,4,5">
+          <rect class="term" x="364" y="166" width="236" height="80" rx="6"/>
+          <text class="code" x="374" y="184"><tspan data-from="3">$ ssh -i key.pem ec2-user@EC2-IP</tspan></text>
+          <text class="code" x="374" y="200"><tspan data-from="4">$ sudo dnf install nginx -y</tspan></text>
+          <text class="code" x="374" y="216"><tspan data-from="5">$ sudo systemctl enable --now nginx</tspan></text>
+          <text class="code ok" x="374" y="234"><tspan data-from="5">Active: active (running)</tspan></text>
+        </g>
+
+        <!-- NGINX -->
+        <g data-from="4" data-focus="4,5,7,8">
+          <rect id="nginxBox" class="nginx" x="364" y="258" width="150" height="40" rx="8"/>
+          <text class="lbl" x="439" y="274" text-anchor="middle">NGINX</text>
+          <text id="nginxState" class="small" x="439" y="288" text-anchor="middle">installed</text>
+        </g>
+
+        <!-- Files -->
+        <g data-from="6" data-focus="6,8">
+          <rect class="files" x="630" y="166" width="190" height="132" rx="8"/>
+          <text class="small" x="725" y="182" text-anchor="middle">/usr/share/nginx/html</text>
+          <g class="chip"><rect x="650" y="190" width="150" height="22" rx="5"/><text x="725" y="205" text-anchor="middle">index.html</text></g>
+          <g class="chip"><rect x="650" y="218" width="150" height="22" rx="5"/><text x="725" y="233" text-anchor="middle">style.css</text></g>
+          <g class="chip"><rect x="650" y="246" width="150" height="22" rx="5"/><text x="725" y="261" text-anchor="middle">script.js</text></g>
+          <g class="chip"><rect x="650" y="274" width="150" height="18" rx="5"/><text x="725" y="287" text-anchor="middle">images/</text></g>
+        </g>
+        <path class="wire" data-from="6" d="M514 278 H630"/>
+
+        <!-- outside world -->
+        <g data-from="1" data-focus="3">
+          <rect class="box" x="10" y="20" width="110" height="70" rx="8"/>
+          <text class="lbl" x="65" y="45" text-anchor="middle">Your laptop</text>
+          <text class="small" x="65" y="59" text-anchor="middle">terminal (SSH)</text>
+          <text class="code" x="65" y="80" text-anchor="middle">$ ssh -i key.pem</text>
+        </g>
+        <g data-from="1" data-focus="7,8">
+          <rect class="box" x="170" y="150" width="100" height="60" rx="8"/>
+          <text class="lbl" x="220" y="177" text-anchor="middle">The Internet</text>
+          <text class="small" x="220" y="192" text-anchor="middle">public roads</text>
+        </g>
+        <g data-from="1" data-focus="7,8">
+          <rect class="box" x="270" y="116" width="50" height="130" rx="8"/>
+          <text class="lbl" x="295" y="170" text-anchor="middle">Internet</text>
+          <text class="lbl" x="295" y="184" text-anchor="middle">Gateway</text>
+          <text class="small" x="295" y="198" text-anchor="middle">main gate</text>
+        </g>
+        <g data-from="1" data-focus="7,8">
+          <rect class="box" x="10" y="250" width="130" height="90" rx="8"/>
+          <text class="lbl" x="75" y="272" text-anchor="middle">Visitor browser</text>
+          <rect class="url" x="20" y="282" width="110" height="20" rx="5"/>
+          <text class="code" x="75" y="296" text-anchor="middle">http://54.210.x.x</text>
+          <text id="bState" class="small" x="75" y="322" text-anchor="middle">waiting</text>
+        </g>
+
+        <!-- Request paths -->
+        <path id="sshPath" class="wire ssh" data-from="3" d="M120 55 H340 V176 H364"/>
+        <path id="httpPath" class="wire http" data-from="7" d="M140 300 H220 V180 H345 V278 H364"/>
+        <g id="packet" opacity="0"><circle r="11"/><text y="5" text-anchor="middle">✉</text></g>
+      </svg>
+    </section>
+
+    <section class="detail" aria-live="polite">
+      <h2 id="dTitle"></h2>
+      <div class="cols">
+        <div><h3>In plain words</h3><p id="dPlain"></p></div>
+        <div><h3>Technical name</h3><p id="dTech"></p></div>
+        <div><h3>Watch the picture</h3><p id="dWatch"></p></div>
+      </div>
+      <h3>Run this</h3>
+      <pre id="dCmd"></pre>
+      <div class="nav">
+        <button id="prev">Back</button>
+        <span id="count"></span>
+        <button id="next" class="primary">Next step</button>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
